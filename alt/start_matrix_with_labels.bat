@@ -1,3 +1,0 @@
-@echo off
-streamlit run decision_matrix_autosave_with_labels.py
-pause
