@@ -1,0 +1,123 @@
+{
+    "criteria_list": [
+        "Price per m\u00b2",
+        "Land Size",
+        "Beach Quality",
+        "Orientation & View",
+        "Access & Infrastructure",
+        "Ownership Status",
+        "Surrounding Environment",
+        "Development Potential",
+        "Natural Risks",
+        "Emotional Impact"
+    ],
+    "weights": {
+        "Price per m\u00b2": 1.0,
+        "Land Size": 1.0,
+        "Beach Quality": 1.0,
+        "Orientation & View": 1.0,
+        "Access & Infrastructure": 1.0,
+        "Ownership Status": 1.0,
+        "Surrounding Environment": 1.0,
+        "Development Potential": 1.0,
+        "Natural Risks": 1.0,
+        "Emotional Impact": 1.0
+    },
+    "comments": {
+        "Price per m\u00b2": "",
+        "Land Size": "",
+        "Beach Quality": "",
+        "Orientation & View": "",
+        "Access & Infrastructure": "",
+        "Ownership Status": "",
+        "Surrounding Environment": "",
+        "Development Potential": "",
+        "Natural Risks": "",
+        "Emotional Impact": ""
+    },
+    "scores": {
+        "Option A": {
+            "Maya": {
+                "Price per m\u00b2": 3,
+                "Land Size": 3,
+                "Beach Quality": 3,
+                "Orientation & View": 3,
+                "Access & Infrastructure": 3,
+                "Ownership Status": 3,
+                "Surrounding Environment": 3,
+                "Development Potential": 3,
+                "Natural Risks": 3,
+                "Emotional Impact": 3
+            },
+            "Mike": {
+                "Price per m\u00b2": 3,
+                "Land Size": 3,
+                "Beach Quality": 3,
+                "Orientation & View": 3,
+                "Access & Infrastructure": 3,
+                "Ownership Status": 3,
+                "Surrounding Environment": 3,
+                "Development Potential": 3,
+                "Natural Risks": 3,
+                "Emotional Impact": 3
+            }
+        },
+        "Option B": {
+            "Maya": {
+                "Price per m\u00b2": 3,
+                "Land Size": 3,
+                "Beach Quality": 3,
+                "Orientation & View": 3,
+                "Access & Infrastructure": 3,
+                "Ownership Status": 3,
+                "Surrounding Environment": 3,
+                "Development Potential": 3,
+                "Natural Risks": 3,
+                "Emotional Impact": 3
+            },
+            "Mike": {
+                "Price per m\u00b2": 3,
+                "Land Size": 3,
+                "Beach Quality": 3,
+                "Orientation & View": 3,
+                "Access & Infrastructure": 3,
+                "Ownership Status": 3,
+                "Surrounding Environment": 3,
+                "Development Potential": 3,
+                "Natural Risks": 3,
+                "Emotional Impact": 3
+            }
+        },
+        "Option C": {
+            "Maya": {
+                "Price per m\u00b2": 3,
+                "Land Size": 3,
+                "Beach Quality": 3,
+                "Orientation & View": 3,
+                "Access & Infrastructure": 3,
+                "Ownership Status": 3,
+                "Surrounding Environment": 3,
+                "Development Potential": 3,
+                "Natural Risks": 3,
+                "Emotional Impact": 3
+            },
+            "Mike": {
+                "Price per m\u00b2": 3,
+                "Land Size": 3,
+                "Beach Quality": 3,
+                "Orientation & View": 3,
+                "Access & Infrastructure": 3,
+                "Ownership Status": 3,
+                "Surrounding Environment": 3,
+                "Development Potential": 3,
+                "Natural Risks": 3,
+                "Emotional Impact": 3
+            }
+        }
+    },
+    "option_labels": {
+        "Option A": "Option A",
+        "Option B": "Option B",
+        "Option C": "Option C"
+    }
+}
