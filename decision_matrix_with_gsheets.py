@@ -17,7 +17,16 @@ st.title("🏝️ Land Decision Matrix")
 # --- Google Sheets Setup ---
 SHEET_NAME = "Decision Matrix Data"
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)
+
+import json
+import streamlit as st
+from oauth2client.service_account import ServiceAccountCredentials
+
+scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+
+credentials_dict = json.loads(st.secrets["google_credentials"]["json"])
+creds = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
+
 client = gspread.authorize(creds)
 
 # --- Google Drive Setup ---
