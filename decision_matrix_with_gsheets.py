@@ -66,21 +66,35 @@ def upload_to_drive(file, opt_key):
         if tmp_file and not tmp_file.closed:
             tmp_file.close()
 
+# --- Cached Load Functions ---
+@st.cache_data(ttl=600)
+def load_setup_data():
+    sheet = client.open(SHEET_NAME).worksheet("setup")
+    return pd.DataFrame(sheet.get_all_records())
+
+@st.cache_data(ttl=600)
+def load_options_data():
+    sheet = client.open(SHEET_NAME).worksheet("options")
+    return pd.DataFrame(sheet.get_all_records())
+
+@st.cache_data(ttl=600)
+def load_comment_data():
+    sheet = client.open(SHEET_NAME).worksheet("comments")
+    return sheet.get_all_values()
+
 # --- Initial Load from Sheets ---
 try:
-    sheet_setup = client.open(SHEET_NAME).worksheet("setup")
-    setup_data = pd.DataFrame(sheet_setup.get_all_records())
+    setup_data = load_setup_data()
     if "Criteria" in setup_data.columns and "Weight" in setup_data.columns:
         st.session_state.criteria_list = setup_data["Criteria"].tolist()
         for i, row in setup_data.iterrows():
             st.session_state[f"weight_{row['Criteria']}"] = float(row["Weight"])
 except Exception as e:
     st.warning(f"Could not load setup data from Google Sheets: {e}")
-    pass # Continue with default criteria if load fails
+    pass  # Continue with default criteria if load fails
 
 try:
-    sheet_opts = client.open(SHEET_NAME).worksheet("options")
-    opt_data = pd.DataFrame(sheet_opts.get_all_records())
+    opt_data = load_options_data()
     option_labels = dict(zip(opt_data["Key"], opt_data["Label"]))
     existing_urls = dict(zip(opt_data["Key"], opt_data.get("Image URLs", [""] * len(opt_data))))
     options = list(option_labels.keys())
@@ -112,8 +126,7 @@ image_urls = {}
 
 # --- Load Comments ---
 try:
-    sheet_comments = client.open(SHEET_NAME).worksheet("comments")
-    comment_data = sheet_comments.get_all_values()
+    comment_data = load_comment_data()
     if comment_data:
         for row in comment_data[1:]:
             crit, opt_label, comment = row
@@ -122,7 +135,7 @@ try:
                     st.session_state[f"comment_{crit}_{opt_key}"] = comment
 except Exception as e:
     st.warning(f"Could not load comments from Google Sheets: {e}")
-    pass # Continue without comments if load fails
+    pass  # Continue without comments if load fails
 
 # --- Input UI ---
 st.subheader("📋 Evaluation per Land Option")
@@ -182,65 +195,6 @@ for opt in options:
         image_urls[opt] = ", ".join(sorted(list(set(urls))))
 
         # --- Weiter mit dem Bewertungsblock oder anderem Content ---
-
-
-# # --- Input UI ---
-# st.subheader("📋 Evaluation per Land Option")
-
-# for opt in options:
-#     label = option_labels[opt]
-#     with st.container():
-#         st.markdown(f"### 🏝️ {label}")  # Option A+B+C+D etc.
-
-#         # --- Moved Image Upload Section ---
-#         st.markdown("**🖼 Upload Images**")
-
-#         # Feste Bildmaße für alle iFrames (zentral definieren)
-#         image_iframe_height = 170
-#         image_width_opt = 200
-
-#         # Bestehende Bilder anzeigen mit Abstand
-#         existing_links = existing_urls.get(opt, "").split(", ") if existing_urls.get(opt) else []
-#         if existing_links:
-#             st.markdown("_Previously uploaded images:_")
-
-#             n_cols = min(4, len(existing_links))
-#             cols = st.columns(n_cols)
-
-#             for idx, url in enumerate(existing_links):
-#                 with cols[idx % n_cols]:
-#                     if "drive.google.com" in url and "id=" in url:
-#                         file_id = url.split("id=")[-1].strip()
-#                         embed_url = f"https://drive.google.com/file/d/{file_id}/preview"
-#                         # Hier konsequent die Variablen nutzen:
-#                         st.components.v1.iframe(embed_url, height=image_iframe_height, width=image_width_opt)
-#                     else:
-#                         st.warning("⚠️ Invalid image URL.")
-
-#         # Neue Bilder hochladen
-#         uploaded = st.file_uploader(
-#             f"Upload image(s) for {label}",
-#             type=["jpg", "jpeg", "png"],
-#             accept_multiple_files=True,
-#             key=f"img_{opt}"
-#         )
-#         urls = existing_links.copy()
-
-#         image_cols = st.columns(min(4, len(uploaded))) if uploaded else []
-
-#         for idx, file in enumerate(uploaded):
-#             try:
-#                 link = upload_to_drive(file, opt)
-#                 if link:
-#                     urls.append(link)
-#                     with image_cols[idx % len(image_cols)]:
-#                         st.image(file, width=image_width_opt)
-#             except Exception as e:
-#                 st.warning(f"❌ An unexpected error occurred during image processing: {e}")
-
-#         image_urls[opt] = ", ".join(sorted(list(set(urls))))
-        # --- End Moved Image Upload Section ---
-
         st.markdown("**📝 Evaluation**")
         df_rows = []
         for crit in st.session_state.criteria_list:
