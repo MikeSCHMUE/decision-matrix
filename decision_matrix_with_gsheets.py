@@ -27,7 +27,7 @@ client = gspread.authorize(credentials)
 
 # --- Google Drive Setup ---
 FOLDER_ID = "1i6W2CHXgnIn9g51tgs1WgAdZM_lK1HKP"
-drive_service = build("drive", "v3", credentials=creds)
+drive_service = build("drive", "v3", credentials=credentials)
 
 def upload_to_drive(file, opt_key):
     tmp_file = None
