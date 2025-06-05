@@ -114,29 +114,27 @@ def upload_to_drive(file, opt_key):
 
 # --- Setup-Daten laden ---
 @st.cache_data(ttl=600, show_spinner=False)
-def load_setup_data(ws_setup):
+def load_setup_data(_ws_setup):
     try:
-        return pd.DataFrame(ws_setup.get_all_records())
+        return pd.DataFrame(_ws_setup.get_all_records())
     except Exception as e:
         st.warning("⚠️ Fehler beim Laden der Setup-Daten.")
         st.text(str(e))
         return pd.DataFrame()
-
-# --- Options-Daten laden ---
+    
 @st.cache_data(ttl=600, show_spinner=False)
-def load_options_data(ws_options):
+def load_options_data(_ws_options):
     try:
-        return pd.DataFrame(ws_options.get_all_records())
+        return pd.DataFrame(_ws_options.get_all_records())
     except Exception as e:
         st.warning("⚠️ Fehler beim Laden der Options-Daten.")
         st.text(str(e))
         return pd.DataFrame()
 
-# --- Kommentare laden ---
 @st.cache_data(ttl=600, show_spinner=False)
-def load_comment_data(ws_comments):
+def load_comment_data(_ws_comments):
     try:
-        return ws_comments.get_all_values()
+        return _ws_comments.get_all_values()
     except Exception as e:
         st.warning("⚠️ Fehler beim Laden der Kommentare.")
         st.text(str(e))
