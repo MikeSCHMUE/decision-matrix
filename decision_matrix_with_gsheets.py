@@ -332,12 +332,12 @@ class PDF(FPDF):
 
     def table(self, data):
         self.set_font("Arial", "B", 12)
-        self.cell(80, 10, "Option", 1)
+        self.cell(140, 10, "Option", 1)
         self.cell(40, 10, "Total Score", 1)
         self.ln()
         self.set_font("Arial", "", 12)
         for index, row in data.iterrows():
-            self.cell(80, 10, str(row["Option"]), 1)
+            self.cell(140, 10, str(row["Option"]), 1)
             self.cell(40, 10, str(round(row["Total Score"], 2)), 1)
             self.ln()
 
