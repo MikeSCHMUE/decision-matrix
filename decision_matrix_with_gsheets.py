@@ -25,6 +25,14 @@ creds_json = dict(st.secrets["google"])
 credentials = ServiceAccountCredentials.from_json_keyfile_dict(creds_json, scope)
 client = gspread.authorize(credentials)
 
+# --- 📄 Globaler Zugriff auf alle Worksheets (nur 1× öffnen) ---
+spreadsheet = client.open(SHEET_NAME)
+ws_options = spreadsheet.worksheet("options")
+ws_setup = spreadsheet.worksheet("setup")
+ws_comments = spreadsheet.worksheet("comments")
+ws_overview = spreadsheet.worksheet("Overview")
+ws_scores = spreadsheet.worksheet("Full Scores")
+
 # --- Google Drive Setup ---
 FOLDER_ID = "1i6W2CHXgnIn9g51tgs1WgAdZM_lK1HKP"
 drive_service = build("drive", "v3", credentials=credentials)
@@ -66,21 +74,20 @@ def upload_to_drive(file, opt_key):
         if tmp_file and not tmp_file.closed:
             tmp_file.close()
 
-# --- Cached Load Functions ---
 @st.cache_data(ttl=600)
 def load_setup_data():
-    sheet = client.open(SHEET_NAME).worksheet("setup")
-    return pd.DataFrame(sheet.get_all_records())
+    ss = client.open(SHEET_NAME)
+    return pd.DataFrame(ss.worksheet("setup").get_all_records())
 
 @st.cache_data(ttl=600)
 def load_options_data():
-    sheet = client.open(SHEET_NAME).worksheet("options")
-    return pd.DataFrame(sheet.get_all_records())
+    ss = client.open(SHEET_NAME)
+    return pd.DataFrame(ss.worksheet("options").get_all_records())
 
 @st.cache_data(ttl=600)
 def load_comment_data():
-    sheet = client.open(SHEET_NAME).worksheet("comments")
-    return sheet.get_all_values()
+    ss = client.open(SHEET_NAME)
+    return ss.worksheet("comments").get_all_values()
 
 # --- Initial Load from Sheets ---
 try:
@@ -136,25 +143,6 @@ try:
 except Exception as e:
     st.warning(f"Could not load comments from Google Sheets: {e}")
     pass  # Continue without comments if load fails
-
-# # --- Ensure readable Option Labels in DF before pivot (Overview) ---
-# # (This part should be used in the export/render section of overview dataframe)
-# # df["Option"] = df["Option"].apply(lambda x: option_labels.get(x, x))
-
-# # 💾 Full Score-Einträge mit Label speichern (optional)
-# # Beispielhafter Speicher-Block (ergänzen, falls nicht vorhanden)
-# try:
-#     sheet_full = client.open(SHEET_NAME).worksheet("Full Scores")
-#     rows = [["Criteria", "Person", "Option", "Score"]] + [
-#         [crit, person, option_labels.get(opt, opt), score]
-#         for (crit, person, opt, score) in all_scores
-#     ]
-#     if len(rows) > 1:
-#         sheet_full.clear()
-#         sheet_full.update("A1", rows)
-# except Exception as e:
-#     st.error(f"Failed to save full scores to Google Sheets: {e}")
-#     pass
 
 # --- Input UI ---
 st.subheader("📋 Evaluation per Land Option")
@@ -266,87 +254,68 @@ for opt in options:
 
 # --- Save Options ---
 try:
-    sheet_opts = client.open(SHEET_NAME).worksheet("options")
     rows = [["Key", "Label", "Image URLs"]] + [[k, v, image_urls.get(k, "")] for k, v in option_labels.items()]
-    sheet_opts.clear()
-    sheet_opts.update("A1", rows)
+    ws_options.clear()
+    ws_options.update("A1", rows)
 except Exception as e:
     st.error(f"Failed to save options to Google Sheets: {e}")
     pass
 
 # --- Save Criteria ---
 try:
-    sheet_setup = client.open(SHEET_NAME).worksheet("setup")
     rows = [["Criteria", "Weight"]] + [[crit, st.session_state.get(f"weight_{crit}", 1.0)] for crit in st.session_state.criteria_list]
-    sheet_setup.clear()
-    sheet_setup.update("A1", rows)
+    ws_setup.clear()
+    ws_setup.update("A1", rows)
 except Exception as e:
     st.error(f"Failed to save criteria to Google Sheets: {e}")
     pass
 
 # --- Save Comments ---
 try:
-    sheet_comm = client.open(SHEET_NAME).worksheet("comments")
     rows = [["Criteria", "Option", "Comment"]]
     for crit in st.session_state.criteria_list:
         for opt in options:
             comment = st.session_state.get(f"comment_{crit}_{opt}", "")
             if comment:
                 rows.append([crit, option_labels[opt], comment])
-    if len(rows) > 1: # Only update if there are comments to save
-        sheet_comm.clear()
-        sheet_comm.update("A1", rows)
+    if len(rows) > 1:  # Nur speichern, wenn tatsächlich Kommentare vorliegen
+        ws_comments.clear()
+        ws_comments.update("A1", rows)
 except Exception as e:
     st.error(f"Failed to save comments to Google Sheets: {e}")
     pass
 
 # --- Save Overview ---
 try:
-    sheet_ov = client.open(SHEET_NAME).worksheet("Overview")
     header = ["Criteria"] + list(option_labels.values())
     rows = []
     for crit in st.session_state.criteria_list:
         row = [crit]
         for opt in options:
-            # Filter all_scores for the current criterion and option
             values = [val for (c, p, o, val) in all_scores if c == crit and o == opt]
             avg = round(np.mean(values), 2) if values else ""
             row.append(avg)
-        rows.append(row) # Add the row to the list of rows
-    
-    # Only update if there's data to save
+        rows.append(row)
+
     if rows:
-        sheet_ov.clear()
-        sheet_ov.update("A1", [header] + rows)
+        ws_overview.clear()
+        ws_overview.update("A1", [header] + rows)
 except Exception as e:
     st.error(f"Failed to save overview to Google Sheets: {e}")
     pass
 
 # --- Save Full Scores ---
 try:
-    sheet_full = client.open(SHEET_NAME).worksheet("Full Scores")
     rows = [["Criteria", "Person", "Option", "Score"]] + [
         [crit, person, option_labels.get(opt, opt), score]
         for (crit, person, opt, score) in all_scores
     ]
-    if len(rows) > 1:  # Only update if there are scores to save
-        sheet_full.clear()
-        sheet_full.update("A1", rows)
+    if len(rows) > 1:  # Nur aktualisieren, wenn Scores vorliegen
+        ws_scores.clear()
+        ws_scores.update("A1", rows)
 except Exception as e:
     st.error(f"Failed to save full scores to Google Sheets: {e}")
     pass
-
-
-# # --- Save Full Scores ---
-# try:
-#     sheet_full = client.open(SHEET_NAME).worksheet("Full Scores")
-#     rows = [["Criteria", "Person", "Option", "Score"]] + list(all_scores)
-#     if len(rows) > 1: # Only update if there are scores to save
-#         sheet_full.clear()
-#         sheet_full.update("A1", rows)
-# except Exception as e:
-#     st.error(f"Failed to save full scores to Google Sheets: {e}")
-#     pass
 
 # --- Overview Display ---
 st.subheader("📊 Comparison of All Land Options")
