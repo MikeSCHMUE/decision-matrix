@@ -21,8 +21,7 @@ SHEET_NAME = "Decision Matrix Data"
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 
 # 🔐 Secrets aus Streamlit einlesen (aus [google]-Block)
-creds_dict = st.secrets["google"]
-creds_json = json.loads(json.dumps(creds_dict))  # Konvertiert TOML-Dict in echtes JSON-kompatibles dict
+creds_json = dict(st.secrets["google"])
 credentials = ServiceAccountCredentials.from_json_keyfile_dict(creds_json, scope)
 client = gspread.authorize(creds)
 
