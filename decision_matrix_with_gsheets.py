@@ -3,13 +3,15 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from fpdf import FPDF
 import os, uuid, tempfile
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 import time # Make sure time is imported
+import json
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 
 st.set_page_config(layout="wide")
 st.title("🏝️ Land Decision Matrix")
@@ -18,15 +20,10 @@ st.title("🏝️ Land Decision Matrix")
 SHEET_NAME = "Decision Matrix Data"
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 
-import json
-import streamlit as st
-from oauth2client.service_account import ServiceAccountCredentials
-
-scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-
-credentials_dict = json.loads(st.secrets["google_credentials"]["json"])
-creds = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
-
+# 🔐 Secrets aus Streamlit einlesen (aus [google]-Block)
+creds_dict = st.secrets["google"]
+creds_json = json.loads(json.dumps(creds_dict))  # Konvertiert TOML-Dict in echtes JSON-kompatibles dict
+credentials = ServiceAccountCredentials.from_json_keyfile_dict(creds_json, scope)
 client = gspread.authorize(creds)
 
 # --- Google Drive Setup ---
