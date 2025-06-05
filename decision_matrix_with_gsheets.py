@@ -23,7 +23,7 @@ scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/au
 # 🔐 Secrets aus Streamlit einlesen (aus [google]-Block)
 creds_json = dict(st.secrets["google"])
 credentials = ServiceAccountCredentials.from_json_keyfile_dict(creds_json, scope)
-client = gspread.authorize(creds)
+client = gspread.authorize(credentials)
 
 # --- Google Drive Setup ---
 FOLDER_ID = "1i6W2CHXgnIn9g51tgs1WgAdZM_lK1HKP"
