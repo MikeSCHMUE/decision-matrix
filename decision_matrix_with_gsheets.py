@@ -137,6 +137,25 @@ except Exception as e:
     st.warning(f"Could not load comments from Google Sheets: {e}")
     pass  # Continue without comments if load fails
 
+# --- Ensure readable Option Labels in DF before pivot (Overview) ---
+# (This part should be used in the export/render section of overview dataframe)
+# df["Option"] = df["Option"].apply(lambda x: option_labels.get(x, x))
+
+# 💾 Full Score-Einträge mit Label speichern (optional)
+# Beispielhafter Speicher-Block (ergänzen, falls nicht vorhanden)
+try:
+    sheet_full = client.open(SHEET_NAME).worksheet("Full Scores")
+    rows = [["Criteria", "Person", "Option", "Score"]] + [
+        [crit, person, option_labels.get(opt, opt), score]
+        for (crit, person, opt, score) in all_scores
+    ]
+    if len(rows) > 1:
+        sheet_full.clear()
+        sheet_full.update("A1", rows)
+except Exception as e:
+    st.error(f"Failed to save full scores to Google Sheets: {e}")
+    pass
+
 # --- Input UI ---
 st.subheader("📋 Evaluation per Land Option")
 
